@@ -1,7 +1,6 @@
 // src/app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
 import { DatabaseModule } from './database/database.module';
 import { PostgresModule } from './database/postgres.module';
 import { PgInitService } from './database/pg-init.service';
@@ -23,10 +22,6 @@ import { BlogsRepository } from './blogs/blogs.repository';
       envFilePath: process.env.VERCEL ? undefined : '.env',
       ignoreEnvFile: !!process.env.VERCEL,
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 10000,  // 10 секунд
-      limit: 5,    // 5 запросов за 10 секунд
-    }]),
     DatabaseModule,
     PostgresModule,
     BlogsModule,

@@ -1,7 +1,6 @@
 // src/app.module.ts
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from './database/database.module';
 import { PostgresModule } from './database/postgres.module';
 import { PgInitService } from './database/pg-init.service';
 import { BlogsModule } from './blogs/blogs.module';
@@ -22,7 +21,6 @@ import { BlogsRepository } from './blogs/blogs.repository';
       envFilePath: process.env.VERCEL ? undefined : '.env',
       ignoreEnvFile: !!process.env.VERCEL,
     }),
-    DatabaseModule,
     PostgresModule,
     BlogsModule,
     UsersModule,

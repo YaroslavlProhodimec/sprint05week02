@@ -22,7 +22,12 @@ export class CommentsService {
       throw new NotFoundException('User not found');
     }
 
-    return this.commentsRepository.createComment(postId, content, userId, userLogin);
+    return this.commentsRepository.createComment(
+      postId,
+      content,
+      userId,
+      userLogin,
+    );
   }
 
   async getCommentById(id: string, userId?: string) {
@@ -34,7 +39,6 @@ export class CommentsService {
     if (!post) {
       throw new NotFoundException();
     }
-
     return this.commentsRepository.getCommentsByPostId(postId, query, userId);
   }
 
@@ -43,11 +47,9 @@ export class CommentsService {
     if (!comment) {
       throw new NotFoundException();
     }
-
     if (comment.commentatorInfo.userId !== userId) {
       throw new ForbiddenException();
     }
-
     await this.commentsRepository.updateComment(commentId, content);
   }
 
@@ -56,20 +58,21 @@ export class CommentsService {
     if (!comment) {
       throw new NotFoundException();
     }
-
     if (comment.commentatorInfo.userId !== userId) {
       throw new ForbiddenException();
     }
-
     await this.commentsRepository.deleteComment(commentId);
   }
 
-  async setCommentLikeStatus(commentId: string, userId: string, likeStatus: 'Like' | 'Dislike' | 'None') {
+  async setCommentLikeStatus(
+    commentId: string,
+    userId: string,
+    likeStatus: 'Like' | 'Dislike' | 'None',
+  ) {
     const comment = await this.commentsRepository.findCommentByIdRaw(commentId);
     if (!comment) {
       throw new NotFoundException();
     }
-
     if (likeStatus === 'None') {
       await this.commentsRepository.removeLike(commentId, userId);
     } else {

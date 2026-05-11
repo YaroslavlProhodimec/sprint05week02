@@ -6,6 +6,8 @@ import { CreatePostDto, UpdatePostDto } from '../dto/postsDTO/create-post.dto';
 import { OutputPostType } from '../types/post/output';
 import { postMapper } from '../types/post/mapper';
 import { BlogsRepository } from '../blogs/blogs.repository';
+import { PostLikesRepository } from '../post-likes/post-likes.repository';
+import { UsersRepository } from '../users/users-sql.repository';
 
 function rowToPostRecord(row: any) {
   return {
@@ -37,7 +39,16 @@ export class PostsRepository {
     @Inject(PG_POOL) private pool: Pool,
     @Inject(forwardRef(() => BlogsRepository))
     private blogsRepository: BlogsRepository,
+    private postLikesRepository: PostLikesRepository,
+    private usersRepository: UsersRepository,
   ) {}
+
+  private mapperDeps() {
+    return {
+      postLikesRepository: this.postLikesRepository,
+      usersRepository: this.usersRepository,
+    };
+  }
 
   async getPosts(query: any = {}, userId?: string) {
     const {
@@ -65,7 +76,9 @@ export class PostsRepository {
     );
 
     const items = await Promise.all(
-      rowsRes.rows.map((r) => postMapper(rowToPostRecord(r), userId)),
+      rowsRes.rows.map((r) =>
+        postMapper(rowToPostRecord(r), userId, this.mapperDeps()),
+      ),
     );
 
     return {
@@ -87,7 +100,7 @@ export class PostsRepository {
         [id],
       );
       if (res.rows.length === 0) return null;
-      return postMapper(rowToPostRecord(res.rows[0]), userId);
+      return postMapper(rowToPostRecord(res.rows[0]), userId, this.mapperDeps());
     } catch {
       return null;
     }
@@ -106,7 +119,7 @@ export class PostsRepository {
        RETURNING *`,
       [id, dto.title, dto.shortDescription, dto.content, dto.blogId, blog.name],
     );
-    return postMapper(rowToPostRecord(res.rows[0]));
+    return postMapper(rowToPostRecord(res.rows[0]), undefined, this.mapperDeps());
   }
 
   async updatePost(id: string, dto: UpdatePostDto): Promise<boolean> {
@@ -180,7 +193,9 @@ export class PostsRepository {
     );
 
     const items = await Promise.all(
-      rowsRes.rows.map((r) => postMapper(rowToPostRecord(r), userId)),
+      rowsRes.rows.map((r) =>
+        postMapper(rowToPostRecord(r), userId, this.mapperDeps()),
+      ),
     );
 
     return {
